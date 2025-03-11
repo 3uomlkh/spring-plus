@@ -27,7 +27,7 @@ public class TodoSaveResponse {
                 todo.getTitle(),
                 todo.getContents(),
                 todo.getWeather(),
-                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail())
+                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail(), todo.getUser().getNickName())
         );
     }
 }
