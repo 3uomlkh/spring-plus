@@ -1,6 +1,7 @@
 package org.example.expert.domain.todo.dto.response;
 
 import lombok.Getter;
+import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.dto.response.UserResponse;
 
 @Getter
@@ -18,5 +19,15 @@ public class TodoSaveResponse {
         this.contents = contents;
         this.weather = weather;
         this.user = user;
+    }
+
+    public static TodoSaveResponse from(Todo todo) {
+        return new TodoSaveResponse(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getContents(),
+                todo.getWeather(),
+                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail())
+        );
     }
 }
