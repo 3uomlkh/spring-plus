@@ -9,13 +9,17 @@ import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
-import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
+import org.example.expert.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
+    private final UserService userService;
 
     @Transactional
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
@@ -42,8 +47,29 @@ public class TodoService {
         return TodoSaveResponse.from(savedTodo);
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(AuthUser authUser, int page, int size, String weather, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
+
+        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+
+        // 날씨 조건 & 수정일 조건 모두 있을 시, 모든 조건으로 검색
+        if (weather != null && (startDate != null && endDate != null)) {
+            return todoRepository.findByWeatherAndDate(weather, startDateTime, endDateTime, pageable)
+                    .map(TodoResponse::from);
+        }
+
+        // 날씨 조건 있을 시, 날씨 조건으로 검색
+        if (weather != null) {
+            return todoRepository.findByWeather(weather, pageable)
+                    .map(TodoResponse::from);
+        }
+
+        // 수정일 조건 있을 시, 수정일 조건으로 검색
+        if (startDate != null && endDate != null) {
+            return todoRepository.findByStartDateAndEndDate(startDateTime, endDateTime, pageable)
+                    .map(TodoResponse::from);
+        }
 
         Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
 
