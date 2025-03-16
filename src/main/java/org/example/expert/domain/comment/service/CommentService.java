@@ -39,6 +39,7 @@ public class CommentService {
         );
 
         Comment savedComment = commentRepository.save(newComment);
+        todo.IncreaseCommentCount();
 
         return new CommentSaveResponse(
                 savedComment.getId(),

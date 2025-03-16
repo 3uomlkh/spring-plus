@@ -22,6 +22,8 @@ public class Todo extends Timestamped {
     private String title;
     private String contents;
     private String weather;
+    private int commentCount;
+    private int managerCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -39,5 +41,22 @@ public class Todo extends Timestamped {
         this.weather = weather;
         this.user = user;
         this.managers.add(new Manager(user, this));
+        IncreaseManagerCount();
+    }
+
+    public void IncreaseCommentCount() {
+        commentCount++;
+    }
+
+    public void DecreaseCommentCount() {
+        commentCount--;
+    }
+
+    public void IncreaseManagerCount() {
+        managerCount++;
+    }
+
+    public void DecreaseManagerCount() {
+        managerCount--;
     }
 }

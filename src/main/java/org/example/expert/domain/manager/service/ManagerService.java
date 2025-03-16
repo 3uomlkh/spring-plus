@@ -49,6 +49,7 @@ public class ManagerService {
 
         Manager newManagerUser = new Manager(managerUser, todo);
         Manager savedManagerUser = managerRepository.save(newManagerUser);
+        todo.IncreaseManagerCount();
 
         return new ManagerSaveResponse(
                 savedManagerUser.getId(),
@@ -92,5 +93,6 @@ public class ManagerService {
         }
 
         managerRepository.delete(manager);
+        todo.DecreaseManagerCount();
     }
 }
