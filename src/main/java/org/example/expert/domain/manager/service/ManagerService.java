@@ -13,6 +13,7 @@ import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.example.expert.log.service.LogService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -28,6 +29,7 @@ public class ManagerService {
     private final ManagerRepository managerRepository;
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
+    private final LogService logService;
 
     @Transactional
     public ManagerSaveResponse saveManager(AuthUser authUser, long todoId, ManagerSaveRequest managerSaveRequest) {
@@ -42,14 +44,24 @@ public class ManagerService {
 
         User managerUser = userRepository.findById(managerSaveRequest.getManagerUserId())
                 .orElseThrow(() -> new InvalidRequestException("등록하려고 하는 담당자 유저가 존재하지 않습니다."));
+        managerSaveRequest.setResolvedManager(managerUser);
 
         if (ObjectUtils.nullSafeEquals(user.getId(), managerUser.getId())) {
             throw new InvalidRequestException("일정 작성자는 본인을 담당자로 등록할 수 없습니다.");
         }
 
+        // 같은 일정에 중복 매니저 등록 예외
+        if (managerRepository.existsByTodoAndUser(todo, managerUser)) {
+            throw new InvalidRequestException("해당 일정에 이미 등록된 담당자입니다.");
+        }
+
         Manager newManagerUser = new Manager(managerUser, todo);
         Manager savedManagerUser = managerRepository.save(newManagerUser);
+
         todo.IncreaseManagerCount();
+
+        // 성공 로그 저장
+        logService.saveLog("SUCCESS", user, managerUser, todoId, null);
 
         return new ManagerSaveResponse(
                 savedManagerUser.getId(),
