@@ -3,7 +3,6 @@ package org.example.expert.domain.todo.dto.response;
 import lombok.Getter;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.dto.response.UserResponse;
-import org.example.expert.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +33,7 @@ public class TodoResponse {
                 todo.getTitle(),
                 todo.getContents(),
                 todo.getWeather(),
-                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail(), todo.getUser().getNickName()),
+                new UserResponse(todo.getUser().getId(), todo.getUser().getEmail(), todo.getUser().getNickName(), todo.getUser().getProfileImageUrl()),
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         );

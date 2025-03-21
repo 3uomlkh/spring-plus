@@ -56,7 +56,7 @@ public class TodoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(todoService.searchTodos(authUser, title, startDate, endDate, nickName, page, size));
+        return ResponseEntity.ok(todoService.searchTodos(title, startDate, endDate, nickName, page, size));
     }
 
 }

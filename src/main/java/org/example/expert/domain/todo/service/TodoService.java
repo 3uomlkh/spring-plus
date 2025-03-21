@@ -85,7 +85,6 @@ public class TodoService {
     }
 
     public Page<TodoSearchResponse> searchTodos(
-            AuthUser authUser,
             String title,
             LocalDate startDate,
             LocalDate endDate,
