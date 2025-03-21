@@ -6,6 +6,7 @@ import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserProfileImageSaveResponse;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +45,15 @@ public class UserController {
     ) {
         userService.deleteProfileImage(authUser.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<Page<UserResponse>> searchUsers(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String nickName
+    ) {
+        return ResponseEntity.ok(userService.searchUsers(nickName, page, size));
     }
 }

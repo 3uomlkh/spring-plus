@@ -1,6 +1,7 @@
 package org.example.expert.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.expert.aop.annotation.PerformanceCheck;
 import org.example.expert.client.s3.S3Service;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
@@ -8,6 +9,9 @@ import org.example.expert.domain.user.dto.response.UserProfileImageSaveResponse;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +30,7 @@ public class UserService {
 
     public UserResponse getUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new InvalidRequestException("User not found"));
-        return new UserResponse(user.getId(), user.getEmail(), user.getNickName());
+        return UserResponse.of(user);
     }
 
     @Transactional
@@ -83,5 +87,11 @@ public class UserService {
             s3Service.deleteFile(imageUrl); // S3에서 이미지 삭제
             user.updateProfileImageUrl(null); // DB에서 URL 제거
         }
+    }
+
+    @PerformanceCheck
+    public Page<UserResponse> searchUsers(String nickName, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return userRepository.findByNickName(nickName, pageable);
     }
 }
